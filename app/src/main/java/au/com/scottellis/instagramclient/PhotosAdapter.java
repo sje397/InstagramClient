@@ -51,40 +51,53 @@ public class PhotosAdapter extends ArrayAdapter<Photo> {
     public View getView(int position, View convertView, ViewGroup parent) {
         Photo photo = getItem(position);
 
+        final ViewHolder holder;
         if(convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_photo, parent, false);
+            holder = new ViewHolder();
+            holder.ivImage = (ImageView)convertView.findViewById(R.id.ivImage);
+            holder.rivUserPic = (RoundedImageView)convertView.findViewById(R.id.rivUserPic);
+            holder.tvUsername = (TextView)convertView.findViewById(R.id.tvUsername);
+            holder.tvAge = (IconTextView)convertView.findViewById(R.id.tvAge);
+            holder.tvCaption = (TextView)convertView.findViewById(R.id.tvCaption);
+            holder.tvLikes = (IconTextView)convertView.findViewById(R.id.tvLikes);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder)convertView.getTag();
         }
 
-        ImageView ivImage = (ImageView)convertView.findViewById(R.id.ivImage);
-        RoundedImageView rivUserPic = (RoundedImageView)convertView.findViewById(R.id.rivUserPic);
-        TextView tvUsername = (TextView)convertView.findViewById(R.id.tvUsername);
-        IconTextView tvAge = (IconTextView)convertView.findViewById(R.id.tvAge);
-        TextView tvCaption = (TextView)convertView.findViewById(R.id.tvCaption);
-        IconTextView tvLikes = (IconTextView)convertView.findViewById(R.id.tvLikes);
-
-        tvUsername.setText(photo.getUser().getUsername());
+        holder.tvUsername.setText(photo.getUser().getUsername());
 
         Duration age = new Duration(photo.getCreatedTime(), DateTime.now());
         Period agePeriod = age.toPeriod(PeriodType.standard());
-        tvAge.setText(ageFormatter.print(agePeriod));
+        holder.tvAge.setText(ageFormatter.print(agePeriod));
 
         Caption caption = photo.getCaption();
         if(caption != null) {
             String text = String.format(convertView.getResources().getString(R.string.caption_string),
                     caption.getFrom().getUsername(),
                     caption.getText());
-            tvCaption.setText(Html.fromHtml(text));
+            holder.tvCaption.setText(Html.fromHtml(text));
         } else {
-            tvCaption.setText("");
+            holder.tvCaption.setText("");
         }
 
         String likesText = String.format(convertView.getResources().getString(R.string.likes_string),
                 photo.getLikes().getCount());
-        tvLikes.setText(likesText);
+        holder.tvLikes.setText(likesText);
 
-        Picasso.with(getContext()).load(photo.getImages().getStandardResolution().getUrl()).into(ivImage);
-        Picasso.with(getContext()).load(photo.getUser().getProfilePic()).into(rivUserPic);
+        Picasso.with(getContext()).load(photo.getImages().getStandardResolution().getUrl()).into(holder.ivImage);
+        Picasso.with(getContext()).load(photo.getUser().getProfilePic()).into(holder.rivUserPic);
 
         return convertView;
+    }
+
+    private class ViewHolder {
+        ImageView ivImage;
+        RoundedImageView rivUserPic;
+        TextView tvUsername;
+        IconTextView tvAge;
+        TextView tvCaption;
+        IconTextView tvLikes;
     }
 }
